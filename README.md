@@ -43,11 +43,13 @@ npm install @marko/fastify
 ## Setup
 
 ```javascript
-import "@marko/fastify";
 import fastify from "fastify";
+import markoPlugin from "@marko/fastify";
 import Template from "./template.marko";
 
 const app = fastify();
+
+app.register(markoPlugin);
 
 app.get("/", (request, reply) => {
   // Streams Marko template into the response.
@@ -58,20 +60,20 @@ app.get("/", (request, reply) => {
 
 ## $global / out.global
 
-When calling `res.marko` the [`input.$global`](https://markojs.com/docs/rendering/#global-data) is automatically merged with [`app.locals`](https://www.fastify.io/en/5x/api.html#app.locals) and [`res.locals`](https://www.fastify.io/en/5x/api.html#res.locals) from [`fastify`](https://www.fastify.io/). This makes it easy to set some global data via fastify middleware, eg:
-
-_middleware.js_
+When calling `reply.marko` the [`input.$global`](https://markojs.com/docs/rendering/#global-data) is automatically merged with `app.locals` and `reply.locals` (both added by this plugin). This makes it easy to set some global data via fastify hook or globally, eg:
 
 ```js
-export default (req, res, next) => {
-  res.locals.locale = "en-US";
-};
+app.locals.appName = "My App";
+
+app.addHook("onRequest", (request, reply) => {
+  reply.locals.locale = "en-US";
+});
 ```
 
 Then later in a template access via:
 
 ```marko
-<div>${out.global.locale}</div>
+<div>${out.global.appName}: ${out.global.locale}</div>
 ```
 
 # Code of Conduct
