@@ -65,8 +65,10 @@ When calling `reply.marko` the [`input.$global`](https://markojs.com/docs/render
 ```js
 app.locals.appName = "My App";
 
-app.addHook("onRequest", (request, reply) => {
+app.addHook("onRequest", (request, reply, done) => {
   reply.locals.locale = "en-US";
+  reply.locals.serializedGlobals.locale = true;
+  done();
 });
 ```
 
