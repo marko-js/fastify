@@ -28,7 +28,9 @@ export default plugin<never>(((fastify, _options, done) => {
   fastify
     .decorate("locals", {})
     .addHook("onRequest", (_request, reply, done) => {
-      reply.locals = {};
+      reply.locals = {
+        serializedGlobals: {}
+      };
       done();
     })
     .decorateReply(
