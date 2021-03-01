@@ -1,8 +1,14 @@
 import type { FastifyPluginCallback, FastifyReply } from "fastify";
 import plugin from "fastify-plugin";
 
+type Locals = Record<string, unknown> & {
+  serializedGlobals: Record<string, boolean>;
+};
+
 type MarkoInput = Record<string, unknown> & {
-  $global?: Record<string, unknown>;
+  $global?: Record<string, unknown> & {
+    serializedGlobals?: Record<string, boolean>;
+  };
 };
 
 type MarkoTemplate<I extends MarkoInput> = {
@@ -12,11 +18,11 @@ type MarkoTemplate<I extends MarkoInput> = {
 
 declare module "fastify" {
   interface FastifyInstance {
-    locals: Record<string, unknown>;
+    locals: Locals;
   }
 
   interface FastifyReply {
-    locals: Record<string, unknown>;
+    locals: Locals;
     marko<I extends MarkoInput, T extends MarkoTemplate<I>>(
       template: T,
       input?: I
