@@ -2,10 +2,10 @@ name: CI
 
 on:
   pull_request:
-    paths-ignore: ["**.md"]
+    paths-ignore: ["*.md"]
   push:
-    branches: [$default-branch]
-    paths-ignore: ["**.md"]
+    branches: ["main"]
+    paths-ignore: ["*.md"]
 
 jobs:
   build:

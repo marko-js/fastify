@@ -18,7 +18,7 @@
   </a>
   <!-- Coverage -->
   <a href="https://codecov.io/gh/marko-js/fastify">
-    <img src="https://codecov.io/gh/marko-js/fastify/branch/main/graph/badge.svg?token=KWZ4YNTZVY"/>
+    <img src="https://codecov.io/gh/marko-js/fastify/branch/main/graph/badge.svg?token=3VFGDEC7G7"/>
   </a>
   <!-- NPM Version -->
   <a href="https://npmjs.org/package/@marko/fastify">
