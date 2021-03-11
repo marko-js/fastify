@@ -1,7 +1,7 @@
 {
   "name": "@marko/fastify",
   "description": "Render Marko templates in a Fastify application.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": "Dylan Piercey <dpiercey@ebay.com>",
   "bugs": "https://github.com/marko-js/fastify/issues",
   "devDependencies": {
