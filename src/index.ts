@@ -56,9 +56,8 @@ export default plugin<never>(((fastify, _options, done) => {
           input.$global = $global;
         }
 
-        return this.type("text/html; charset=utf-8").send(
-          template.stream(input || { $global })
-        );
+        this.type("text/html; charset=utf-8");
+        template.stream(input || { $global }).pipe(this.raw);
       }
     );
 
