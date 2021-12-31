@@ -56,8 +56,11 @@ export default plugin<never>(((fastify, _options, done) => {
           input.$global = $global;
         }
 
-        this.type("text/html; charset=utf-8");
-        template.stream(input || { $global }).pipe(this.raw);
+        // Disable fastify-compression for this stream
+        this.request.headers["x-no-compression"] = "true";
+        return this.type("text/html; charset=utf-8").send(
+          template.stream(input || { $global })
+        );
       }
     );
 
