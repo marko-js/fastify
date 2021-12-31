@@ -66,6 +66,7 @@
   },
   "types": "dist/esm/index.d.ts",
   "dependencies": {
-    "fastify-plugin": "^3.0.0"
+    "fastify-plugin": "^3.0.0",
+    "tslib": "^1.10.0"
   }
 }
