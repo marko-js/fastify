@@ -2,17 +2,17 @@ name: CI
 
 on:
   pull_request:
-    paths-ignore: ["*.md"]
+    paths-ignore: ["**.md"]
   push:
     branches: ["main"]
-    paths-ignore: ["*.md"]
+    paths-ignore: ["**.md"]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [12.x, 14.x, 15.x]
+        node: [14.x, 16.x]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -20,6 +20,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
+          cache: "npm"
       - name: Install dependencies
         run: npm ci
       - name: Lint code
@@ -27,4 +28,4 @@ jobs:
       - name: Run tests
         run: npm run ci:test
       - name: Report code coverage
-        run: npm run ci:report
+        uses: codecov/codecov-action@v2

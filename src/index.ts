@@ -1,3 +1,4 @@
+import type { Readable } from "stream";
 import type { FastifyPluginCallback, FastifyReply } from "fastify";
 import plugin from "fastify-plugin";
 
@@ -12,7 +13,7 @@ type MarkoInput = Record<string, unknown> & {
 };
 
 type MarkoTemplate<I extends MarkoInput> = {
-  stream(input: I): ReadableStream;
+  stream(input: I): Readable;
   [x: string]: unknown;
 };
 
@@ -35,7 +36,7 @@ export default plugin<never>(((fastify, _options, done) => {
     .decorate("locals", {})
     .addHook("onRequest", (_request, reply, done) => {
       reply.locals = {
-        serializedGlobals: {}
+        serializedGlobals: {},
       };
       done();
     })

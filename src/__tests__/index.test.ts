@@ -1,90 +1,66 @@
-import Fastify, { FastifyInstance } from "fastify";
-import fetch from "node-fetch";
+import snap from "mocha-snap";
+import fastify from "fastify";
 import markoPlugin from "../index";
 import SimpleTemplate from "./fixtures/simple.marko";
 import DynamicTemplate from "./fixtures/dynamic.marko";
 import GlobalsTemplate from "./fixtures/globals.marko";
 import ErrorTemplate from "./fixtures/error.marko";
 
-test("Simple Template", async () => {
-  const { res, html } = await fetchHtml(
-    createApp().get("/", async (req, res) => {
-      await res.marko(SimpleTemplate);
+it("Simple Template", async () => {
+  const res = await fastify()
+    .register(markoPlugin)
+    .get("/", async (_, reply) => await reply.marko(SimpleTemplate))
+    .inject()
+    .get("/");
+
+  await snap.inline(res.statusCode, `200`);
+  await snap.inline(res.headers["content-type"], `text/html; charset=utf-8`);
+  await snap.inline(res.headers["transfer-encoding"], `chunked`);
+  await snap.inline(res.body, `<div>Hello world</div>`);
+});
+
+it("Dynamic Template", async () => {
+  const res = await fastify()
+    .register(markoPlugin)
+    .get(
+      "/",
+      async (_, reply) => await reply.marko(DynamicTemplate, { name: "Dylan" })
+    )
+    .inject()
+    .get("/");
+
+  await snap.inline(res.statusCode, `200`);
+  await snap.inline(res.headers["content-type"], `text/html; charset=utf-8`);
+  await snap.inline(res.headers["transfer-encoding"], `chunked`);
+  await snap.inline(res.body, `<div>Hello Dylan</div>`);
+});
+
+it("Globals Template", async () => {
+  const res = await fastify()
+    .register(markoPlugin)
+    .get("/", async (_, reply) => {
+      reply.locals.greeting = "Goodbye";
+      await reply.marko(GlobalsTemplate, { $global: { name: "Michael" } });
     })
-  );
+    .inject()
+    .get("/");
 
-  expect(res.status).toMatchInlineSnapshot(`200`);
-  expect(res.headers.get("content-type")).toMatchInlineSnapshot(
-    `"text/html; charset=utf-8"`
-  );
-  expect(res.headers.get("transfer-encoding")).toMatchInlineSnapshot(
-    `"chunked"`
-  );
-  expect(html).toMatchInlineSnapshot(`"<div>Hello world</div>"`);
+  await snap.inline(res.statusCode, `200`);
+  await snap.inline(res.headers["content-type"], `text/html; charset=utf-8`);
+  await snap.inline(res.headers["transfer-encoding"], `chunked`);
+  await snap.inline(res.body, `<div>Goodbye Michael</div>`);
 });
 
-test("Dynamic Template", async () => {
-  const { res, html } = await fetchHtml(
-    createApp().get("/", async (req, res) => {
-      await res.marko(DynamicTemplate, { name: "Dylan" });
-    })
-  );
+it("Error In Template", async () => {
+  const res = await fastify()
+    .register(markoPlugin)
+    .get("/", async (_, reply) => await reply.marko(ErrorTemplate))
+    .inject()
+    .get("/");
 
-  expect(res.status).toMatchInlineSnapshot(`200`);
-  expect(res.headers.get("content-type")).toMatchInlineSnapshot(
-    `"text/html; charset=utf-8"`
-  );
-  expect(res.headers.get("transfer-encoding")).toMatchInlineSnapshot(
-    `"chunked"`
-  );
-  expect(html).toMatchInlineSnapshot(`"<div>Hello Dylan</div>"`);
-});
-
-test("Globals Template", async () => {
-  const { res, html } = await fetchHtml(
-    createApp().get("/", async (req, res) => {
-      res.locals.greeting = "Goodbye";
-      await res.marko(GlobalsTemplate, { $global: { name: "Michael" } });
-    })
-  );
-
-  expect(res.status).toMatchInlineSnapshot(`200`);
-  expect(res.headers.get("content-type")).toMatchInlineSnapshot(
-    `"text/html; charset=utf-8"`
-  );
-  expect(res.headers.get("transfer-encoding")).toMatchInlineSnapshot(
-    `"chunked"`
-  );
-  expect(html).toMatchInlineSnapshot(`"<div>Goodbye Michael</div>"`);
-});
-
-test("Error In Template", async () => {
-  const { res, html } = await fetchHtml(
-    createApp()
-      .get("/", async (req, res) => {
-        await res.marko(ErrorTemplate);
-      })
-      .addHook("onError", async (req, res, err) => {
-        expect(err.message).toMatchInlineSnapshot(`
-          "fail
-          Rendered by Promise.resolve()"
-        `);
-      })
-  );
-
-  expect(res.status).toMatchInlineSnapshot(`500`);
-  expect(html).toMatchInlineSnapshot(
-    `"{\\"statusCode\\":500,\\"error\\":\\"Internal Server Error\\",\\"message\\":\\"fail\\\\nRendered by Promise.resolve()\\"}"`
+  await snap.inline(res.statusCode, `500`);
+  await snap.inline(
+    res.body,
+    `{"statusCode":500,"error":"Internal Server Error","message":"fail\\nRendered by Promise.resolve()"}`
   );
 });
-
-async function fetchHtml(app: FastifyInstance) {
-  const res = await fetch(await app.listen(0));
-  const html = await res.text();
-  await app.close();
-  return { res, html };
-}
-
-function createApp() {
-  return Fastify().register(markoPlugin);
-}

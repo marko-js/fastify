@@ -42,6 +42,10 @@ npm install @marko/fastify
 
 ## Setup
 
+> Note: the example below assumes that you've configured the environment to handle `.marko` files.
+> This means using the require hook (`@marko/compiler/register`) or a bundler like `webpack`, `vite`, etc.
+> We recommend using `npm init marko -- --template vite-fastify` for a more complete example!
+
 ```javascript
 import fastify from "fastify";
 import markoPlugin from "@marko/fastify";
@@ -76,6 +80,26 @@ Then later in a template access via:
 
 ```marko
 <div>${out.global.appName}: ${out.global.locale}</div>
+```
+
+## Using with `fastify-compress`
+
+[`fastify-compress`](https://github.com/fastify/fastify-compress) does not currently expose a way for Marko to indicate when it is appropriate to flush out content while streaming. The default behavior for [`zlib`](https://nodejs.org/api/zlib.html#flushing) is to buffer all content, which we don't wan't if we're trying to send out responses as fast as possible.
+
+To properly use Marko with [`fastify-compress`](https://github.com/fastify/fastify-compress) you should configure it to allow flushing out content as it is written. Marko internally will be sure to only write to the response stream when we've reached a point where we're waiting for async content.
+
+```js
+import zlib from "zlib";
+import fastifyCompress from "fastify-compress";
+
+fastify.register(fastifyCompress, {
+  zlibOptions: {
+    flush: zlib.constants.Z_SYNC_FLUSH,
+  },
+  brotliOptions: {
+    flush: zlib.constants.BROTLI_OPERATION_FLUSH,
+  },
+});
 ```
 
 # Code of Conduct
