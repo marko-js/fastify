@@ -52,7 +52,7 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "peerDependencies": {
-    "fastify": "^3",
+    "fastify": "^3 || ^4",
     "marko": "^4 || ^5"
   },
   "repository": {
